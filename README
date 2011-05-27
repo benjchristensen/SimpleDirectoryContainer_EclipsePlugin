@@ -1,0 +1,14 @@
+This is an Eclipse plugin that allows creating a dynamic Classpath Container that observes a folder 
+and loads all .jar (or .zip etc) files into the classpath.
+
+It is an evolution of original code I got from here:
+
+	https://www.ibm.com/developerworks/opensource/tutorials/os-eclipse-classpath/
+
+Thus it originates from Aaron Tarter (aarontar@us.ibm.com).
+
+The primary modification I made (besides renaming things to no longer say 'example') was making it handle
+filenames that had multiple dots (such as com.company.library.name.v2.jar).
+
+The binary in the /dist/ folder just needs to be dropped into the eclipse /plugins/ folder and it will 
+then allow adding a "Directory Container" library to the Java Build Path.
