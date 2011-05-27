@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+   <extension
+       point="org.eclipse.jdt.core.classpathContainerInitializer">
+      <classpathContainerInitializer
+          id="org.container.directory.SIMPLE_DIR_CONTAINER"
+          class="org.container.directory.SimpleDirContainerInitializer"/>
+   </extension>
+   
+   <extension 
+       point="org.eclipse.jdt.ui.classpathContainerPage">
+      <classpathContainerPage
+          id="org.container.directory.SIMPLE_DIR_CONTAINER"
+          name="Directory Container"
+          class="org.container.directory.SimpleDirContainerPage"/>
+   </extension>
+   
+   <extension
+         point="org.eclipse.jdt.ui.javaElementFilters">
+         <filter
+               id="org.container.directory.ContainerDirFilter"
+               targetId="org.eclipse.jdt.ui.PackageExplorer"
+               enabled="true"
+               name="Classpath Directory Container"
+               description="Dynamically include jar files from this directory in the classpath"
+               class="org.container.directory.ContainerDirFilter"/>
+   </extension>
+</plugin>
