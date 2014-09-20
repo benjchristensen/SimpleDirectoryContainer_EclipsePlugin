@@ -37,6 +37,7 @@ public class SimpleDirContainerPage extends WizardPage
     private Button _dirBrowseButton;
     private Text _extText;
     private IPath _initPath = null;
+    private Composite composite;
 
     /**
      * Default Constructor - sets title, page name, description
@@ -59,8 +60,10 @@ public class SimpleDirContainerPage extends WizardPage
      * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
      */
     public void createControl(Composite parent) {
-        Composite composite = new Composite(parent, SWT.NULL);
-        composite.setLayout(new GridLayout());
+        composite = new Composite(parent, SWT.NULL);
+        GridLayout gl_composite = new GridLayout();
+        gl_composite.numColumns = 3;
+        composite.setLayout(gl_composite);
         composite.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL
                 | GridData.HORIZONTAL_ALIGN_FILL));
         composite.setFont(parent.getFont());
@@ -69,7 +72,31 @@ public class SimpleDirContainerPage extends WizardPage
         
         createExtGroup(composite);
         
-        setControl(composite);    
+        setControl(composite);
+                        
+                                Label label = new Label(composite, SWT.NONE);
+                                label.setText(Messages.DirLabel);
+                        
+                                _dirCombo = new Combo(composite, SWT.SINGLE | SWT.BORDER);
+                                _dirCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+                                _dirCombo.setText( getInitDir() );
+                        
+                                _dirBrowseButton= new Button(composite, SWT.PUSH);
+                                _dirBrowseButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+                                _dirBrowseButton.setText( Messages.Browse );
+                                _dirBrowseButton.addSelectionListener(new SelectionAdapter() {
+                                    public void widgetSelected(SelectionEvent e) {
+                                        handleDirBrowseButtonPressed();
+                                   }
+                                });
+                                
+                                        Label label_1 = new Label(composite, SWT.NONE);
+                                        label_1.setText(Messages.ExtLabel);
+                                                
+                                                _extText = new Text(composite,SWT.BORDER);
+                                                _extText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+                                                _extText.setText(getInitExts());
+                                                        new Label(composite, SWT.NONE);
     }
     
     /**
@@ -78,26 +105,6 @@ public class SimpleDirContainerPage extends WizardPage
      * @param parent the parent widget
      */
     private void createDirGroup(Composite parent) {
-        Composite dirSelectionGroup = new Composite(parent, SWT.NONE);
-        GridLayout layout= new GridLayout();
-        layout.numColumns = 3;
-        dirSelectionGroup.setLayout(layout);
-        dirSelectionGroup.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL| GridData.VERTICAL_ALIGN_FILL));
-
-        new Label(dirSelectionGroup, SWT.NONE).setText(Messages.DirLabel);
-
-        _dirCombo = new Combo(dirSelectionGroup, SWT.SINGLE | SWT.BORDER);
-        _dirCombo.setText( getInitDir() );                
-
-        _dirBrowseButton= new Button(dirSelectionGroup, SWT.PUSH);
-        _dirBrowseButton.setText( Messages.Browse ); 
-        _dirBrowseButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
-        _dirBrowseButton.addSelectionListener(new SelectionAdapter() {
-            public void widgetSelected(SelectionEvent e) {
-                handleDirBrowseButtonPressed();
-           }
-        });    
-        setControl(dirSelectionGroup);
     }
     
     /**
@@ -106,18 +113,6 @@ public class SimpleDirContainerPage extends WizardPage
      * @param parent parent widget
      */
     private void createExtGroup(Composite parent) {
-        Composite extSelectionGroup = new Composite(parent, SWT.NONE);
-        GridLayout layout= new GridLayout();
-        layout.numColumns = 2;
-        extSelectionGroup.setLayout(layout);
-        extSelectionGroup.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL| GridData.VERTICAL_ALIGN_FILL));
-
-        new Label(extSelectionGroup, SWT.NONE).setText(Messages.ExtLabel);
-        
-        _extText = new Text(extSelectionGroup,SWT.BORDER);
-        _extText.setText(getInitExts()+"                  ");
-
-        setControl(extSelectionGroup);
     }
     
     /**
