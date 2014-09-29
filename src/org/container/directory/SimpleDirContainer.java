@@ -3,14 +3,20 @@ package org.container.directory;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.core.ClasspathAttribute;
+import org.eclipse.jdt.internal.core.ClasspathEntry;
 
 /**
  * * This classpath container add archive files from a configured project
@@ -28,6 +34,9 @@ public class SimpleDirContainer implements IClasspathContainer {
 
    // user-fiendly name for the container that shows on the UI
    private String _desc;
+
+   // Project of this path
+   private IJavaProject _project;
    // path string that uniquiely identifies this container instance
    private IPath _path;
    // directory that will hold files for inclusion in this container
@@ -64,8 +73,15 @@ public class SimpleDirContainer implements IClasspathContainer {
          if (prefix.endsWith("-src")) {
             return false;
          }
-         if (_exts.contains(ext)) {
+         // Darko TODO: handling of dir container extension must be improved at all. Just a hack for the previous code
+         if (_exts == null) {
+            Logger.log(Logger.WARNING, "Directory Container could not read the extensions from .classpath for: " + dir.toString()
+                  + " of name " + name);
             return true;
+         } else {
+            if (_exts.contains(ext)) {
+               return true;
+            }
          }
 
          return false;
@@ -88,40 +104,37 @@ public class SimpleDirContainer implements IClasspathContainer {
     * @param project
     *           the Java project that is referencing this container
     */
-   public SimpleDirContainer(IPath path, IJavaProject project) {
+   public SimpleDirContainer(final IPath path, IJavaProject project) {
       _path = path;
+      _project = project;
 
-      // extract the extension types for this container from the path
-      String extString = path.lastSegment();
-      _exts = new HashSet<String>();
-      String[] extArray = extString.split(",");
-      for (String ext : extArray) {
-         _exts.add(ext.toLowerCase());
-      }
+      // // extract the extension types for this container from the path
+      // String extString = path.lastSegment();
+      // _exts = new HashSet<String>();
+      // String[] extArray = extString.split(",");
+      // for (String ext : extArray) {
+      // _exts.add(ext.toLowerCase());
+      // }
+
       // extract the directory string from the PATH and create the directory
       // relative
       // to the project
-      path = path.removeLastSegments(1).removeFirstSegments(1);
+      IPath libsPath = createDescriptionPath(path, project);
       File rootProj = project.getProject().getLocation().makeAbsolute().toFile();
-      if (path.segmentCount() == 1 && path.segment(0).equals(ROOT_DIR)) {
-         _dir = rootProj;
-         path = path.removeFirstSegments(1);
-      } else {
-         File classPathFolder = new File(rootProj, path.toString());
-         if (!classPathFolder.exists()) {
-            Logger.log(Logger.WARNING,
-                  "Folder of Directory Container missing: " + path.toString() + " of project " + project.getElementName()
-                        + " creating it now to avoid errors in eclipse");
+      // remove indicator path of project
+      IPath relativePath = libsPath.removeFirstSegments(1);
+      File classPathFolder = new File(rootProj, relativePath.toString());
+      if (!classPathFolder.exists()) {
+         Logger.log(Logger.WARNING, "Folder of Directory Container missing: " + libsPath.toString() + " of project " + project.getElementName()
+               + " creating it now to avoid errors in eclipse");
 
-            classPathFolder.mkdirs();
-         }
-         _dir = classPathFolder;
-
+         classPathFolder.mkdirs();
       }
+      _dir = classPathFolder;
 
       // Create UI String for this container that reflects the directory being
       // used
-      _desc = "Directory Classpath: /" + path;
+      _desc = createDescription(path, project);
 
    }
 
@@ -158,8 +171,10 @@ public class SimpleDirContainer implements IClasspathContainer {
          try {
             for (File lib : libs) {
                // strip off the file extension
-               String ext = lib.getName().split("[.]")[1];
+               String[] splittedName = lib.getName().split("[.]");
+               String ext = splittedName[splittedName.length - 1];
 
+               // TODO: this is really a awful check against sources
                // now see if this archive has an associated src jar
                File srcArc = new File(lib.getAbsolutePath().replace("." + ext, "-src." + ext));
                Path srcPath = null;
@@ -232,4 +247,125 @@ public class SimpleDirContainer implements IClasspathContainer {
       }
       return false;
    }
+
+   /**
+    * Get the full path of the the given path and project.
+    * 
+    * @param path
+    *           the path
+    * @param project
+    *           the java project
+    * @return the full path to this classpathContainer
+    */
+   public static String getFullPath(IPath path, IJavaProject project) {
+      String result;
+
+      String projDir = project.getProject().getLocation().toString();
+
+      if (path != null && !path.makeRelativeTo(SimpleDirContainer.ID).isEmpty()) {
+         result = projDir + IPath.SEPARATOR + path.makeRelativeTo(SimpleDirContainer.ID);
+      } else {
+         result = projDir;
+      }
+
+      return result;
+
+   }
+
+   public static IClasspathEntry getClasspathEntry(IJavaProject project, String projectRelativeLibFolder, String fileExtensions) {
+      String dir = projectRelativeLibFolder;
+      if (dir.equals("")) {
+         dir = SimpleDirContainer.ROOT_DIR;
+      }
+      IPath containerPath = SimpleDirContainer.ID.append("/" + project.getElementName() + "/" + dir);
+
+      Set<IClasspathAttribute> attrList = new HashSet<IClasspathAttribute>();
+      attrList.addAll(Arrays.asList(ClasspathEntry.NO_EXTRA_ATTRIBUTES));
+      ClasspathAttribute extensions = new ClasspathAttribute(ClasspathExtraAttribute.FILE_EXTENSTIONS.getValue(), fileExtensions);
+      attrList.add(extensions);
+      IClasspathAttribute[] attributes = new IClasspathAttribute[attrList.size()];
+      attrList.toArray(attributes);
+
+      IClasspathEntry entry = JavaCore.newContainerEntry(containerPath, ClasspathEntry.NO_ACCESS_RULES, attributes, false);
+
+      return entry;
+   }
+
+   public static String getExtraAttributeValue(SimpleDirContainer simpleDirContainer, ClasspathExtraAttribute attribute) {
+      String result = null;
+      if (simpleDirContainer.getClasspathEntries().length > 0) {
+         for (IClasspathAttribute attr : simpleDirContainer.getClasspathEntries()[0].getExtraAttributes()) {
+            if (attr.getName().equalsIgnoreCase(attribute.getValue())) {
+               result = attr.getValue();
+            }
+         }
+      }
+      return result;
+   }
+
+   /**
+    * Lookup in eclipse project settings the corresponding ClasspathContainer.
+    * 
+    * @param containerPath
+    *           the containerpath of SimpleDirContainer
+    * @param project
+    *           the project there the container is registered
+    * @return null or the found container
+    */
+   public static SimpleDirContainer lookupExistingContainer(IPath containerPath, IJavaProject project) {
+      SimpleDirContainer result = null;
+
+      try {
+         IClasspathContainer storedContainer = JavaCore.getClasspathContainer(containerPath, project);
+
+         if (storedContainer != null) {
+            IPath pluginID = storedContainer.getPath().removeLastSegments(storedContainer.getPath().segmentCount() - 1);
+            String storedPath = storedContainer.getPath().toString();
+            // IPath prj = containerPath.removeFirstSegments(1);
+            // prj = prj.removeLastSegments(prj.segmentCount() - 1);
+            // String storedProjectName = prj.toString();
+
+            if (storedContainer instanceof SimpleDirContainer) {
+               result = (SimpleDirContainer) storedContainer;
+            } else if ((storedContainer instanceof IClasspathContainer) && (pluginID.equals(ID)) &&
+            // Darko TODO: fix this really awful hack
+                  (storedContainer.getClass().getSimpleName().equals("PersistedClasspathContainer"))) {
+               result = new SimpleDirContainer(storedContainer.getPath(), project);
+            } else {
+               Logger.log(Logger.ERROR, "Classpath container " + SimpleDirContainer.class.getSimpleName() + " lookup failed: "
+                     + containerPath.toString() + " of project " + project.getElementName()
+                     + " found a corresponding path-value to SimpleDirContainer but not a instance of it");
+            }
+         }
+      } catch (JavaModelException modelEx) {
+         Logger.log(Logger.ERROR,
+               "Classpath container " + SimpleDirContainer.class.getSimpleName() + " lookup failed: " + containerPath.toString()
+                     + " of project " + project.getElementName());
+      }
+
+      return result;
+   }
+
+   private static IPath createDescriptionPath(IPath containerPath, IJavaProject project) {
+      IPath result = containerPath.removeFirstSegments(1);
+      if (result.segmentCount() == 1 && result.segment(0).equals(ROOT_DIR)) {
+         result = result.removeFirstSegments(1);
+      }
+      return result;
+   }
+
+   public static String createDescription(IPath containerPath, IJavaProject project) {
+      String result = null;
+
+      result = "Directory Classpath: /" + createDescriptionPath(containerPath, project);
+
+      return result;
+   }
+
+   @Override
+   public String toString() {
+      return "SimpleDirContainer [_desc=" + _desc + ", _project=" + _project + ", _path=" + _path + ", _dir=" + _dir + ", _exts=" + _exts
+            + ", _dirFilter=" + _dirFilter + "]";
+   }
+
 }
