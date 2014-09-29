@@ -2,18 +2,19 @@ This is an Eclipse plugin that allows creating a dynamic Classpath Container tha
 and loads all .jar (or .zip etc) files into the classpath.
 
 It is an evolution of original code I got from here:
-
 	https://www.ibm.com/developerworks/opensource/tutorials/os-eclipse-classpath/
-
 Thus it originates from Aaron Tarter (aarontar@us.ibm.com).
 
-The primary modification I made (besides renaming things to no longer say 'example') was making it handle
+The primary modification Ben Christensen made (besides renaming things to no longer say 'example') was making it handle
 filenames that had multiple dots (such as com.company.library.name.v2.jar).
+
+The improvements I made (Darko Palic) are to allow multiple directory containers in the classpaths and of course therefore in the eclipse launches.
+The previous version had bigger issues about it.
 
 The binary in downloads on GitHub just needs to be dropped into the eclipse /plugins/ folder and it will 
 then allow adding a "Directory Container" library to the Java Build Path.
 
-https://github.com/downloads/benjchristensen/SimpleDirectoryContainer_EclipsePlugin/DirectoryClasspathContainer_1.0.0_EclipsePlugin.jar
+https://github.com/dpalic/SimpleDirectoryContainer_EclipsePlugin/tree/master/ExportedPlugin
 
 I created this jar by exporting a "Deployable plug-ins and fragments" from Eclipse at the project level.
 
