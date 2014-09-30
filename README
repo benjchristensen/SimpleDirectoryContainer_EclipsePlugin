@@ -17,5 +17,3 @@ then allow adding a "Directory Container" library to the Java Build Path.
 https://github.com/dpalic/SimpleDirectoryContainer_EclipsePlugin/tree/master/ExportedPlugin
 
 I created this jar by exporting a "Deployable plug-ins and fragments" from Eclipse at the project level.
-
-Hope it helps someone other than me.
