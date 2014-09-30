@@ -40,7 +40,7 @@ public class ContainerDirFilter extends ViewerFilter {
                   if (SimpleDirContainer.ID.isPrefixOf(entry.getPath())) {
                      // we know this is a SimpleDirContainer so lets get the instance
                      SimpleDirContainer con = (SimpleDirContainer) JavaCore.getClasspathContainer(entry.getPath(), jp);
-                     if (con.isContained(f.getLocation().toFile())) {
+                     if (con.isFileExtensionContained(f.getLocation().toFile())) {
                         // this file will is included in the container, so dont show it
                         return false;
                      }
