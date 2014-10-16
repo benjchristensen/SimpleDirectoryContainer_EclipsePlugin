@@ -1,5 +1,6 @@
 This is an Eclipse plugin that allows creating a dynamic Classpath Container that observes a folder 
-and loads all .jar (or .zip etc) files into the classpath.
+and loads all .jar (or .zip etc) files into the classpath. This plugin is helpful to use a bunch of jar files in one folder as your classpath, without setting it manually.
+We use it to get rid of the buggy IvyDE plugin for our IVY dependency management.
 
 It is an evolution of original code I got from here:
 	https://www.ibm.com/developerworks/opensource/tutorials/os-eclipse-classpath/
@@ -21,3 +22,13 @@ or directly (but maybe outdated):
 https://github.com/dpalic/SimpleDirectoryContainer_EclipsePlugin/raw/master/ExportedPlugin/DirectoryClasspathContainer_1.1.2.jar
 
 I created this jar by exporting a "Deployable plug-ins and fragments" from Eclipse at the project level.
+
+###############
+# INSTALLATION
+###############
+1. Download the latest jar file (see above)
+2. stop your eclipse (ensure it is really stopped in taskmanager)
+3. put the downloaded jar file into your eclipse\plugin folder
+4. restart your eclipse
+5. in Eclipse go to you Java Build Path settings and go to the tab Libraries
+6. "Add Library..." will provide you now a new entry "Directory container"
