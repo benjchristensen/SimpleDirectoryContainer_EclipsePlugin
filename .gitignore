@@ -2,3 +2,6 @@ bin/*
 build/*
 /bin
 /target
+.metadata/*
+.recommenders/*
+RemoteSystemsTempFiles/*
