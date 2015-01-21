@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.core.ClasspathEntry;
  * @author Aaron J Tarter
  * @author benjchristensen (modified handling of filenames with multiple .'s in
  *         them)
+ * @author Darko Palic
  */
 public class SimpleDirContainer implements IClasspathContainer {
    public final static Path ID = new Path("org.container.directory.SIMPLE_DIR_CONTAINER");
@@ -224,6 +225,12 @@ public class SimpleDirContainer implements IClasspathContainer {
       return classpathEntries;
    }
 
+   /**
+    * TODO: this is a evil hack, should be refactored properly to do only small steps.
+    * 
+    * @param classpathDirectory the directory of the given classpath folder in eclipse.
+    * @return the array of the classpath entries in the given folder
+    */
    private IClasspathEntry[] resolveLibsFromDir(File classpathDirectory) {
       ArrayList<IClasspathEntry> entryList = new ArrayList<IClasspathEntry>();
       // fetch the names of all files that match our filter
@@ -231,7 +238,9 @@ public class SimpleDirContainer implements IClasspathContainer {
       File resolvedDir = classpathDirectory;
       if (resolvedDir.isDirectory()) {
 
+         // get the files and sort the files to be in correct lexical order in eclipse classpath later
          File[] libs = resolvedDir.listFiles(_dirFilter);
+         Arrays.sort(libs);
 
          try {
             for (File lib : libs) {
@@ -251,13 +260,16 @@ public class SimpleDirContainer implements IClasspathContainer {
                // source
                // archive if it exists
 
-               entryList.add(JavaCore.newLibraryEntry(new Path(lib.getAbsolutePath()), srcPath, new Path("/")));
+               IClasspathEntry entry = JavaCore.newLibraryEntry(new Path(lib.getAbsolutePath()), srcPath, new Path("/"));
+               entryList.add(entry);
             }
          } catch (Exception e) {
             e.printStackTrace();
             Logger.log(Logger.ERROR, "getClasspathEntries - ERROR: " + e.getMessage());
          }
       }
+      
+      
       // convert the list to an array and return it
       IClasspathEntry[] entryArray = new IClasspathEntry[entryList.size()];
 

@@ -32,7 +32,7 @@ public class SimpleDirContainerInitializer extends ClasspathContainerInitializer
 //      if (project.isOpen()) {
 //         container = SimpleDirContainer.lookupExistingContainer(containerPath, project);
 //      }
-      
+  
       if (container == null) {
          container = new SimpleDirContainer(containerPath, project);
          if (container.isValid()) {
