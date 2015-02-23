@@ -16,10 +16,10 @@ The binary in downloads on GitHub just needs to be dropped into the eclipse /plu
 then allow adding a "Directory Container" library to the Java Build Path.
 
 You can find the latest verion here:
-https://github.com/dpalic/SimpleDirectoryContainer_EclipsePlugin/tree/master/SimpleDirectoryContainer_EclipsePlugin/ExportedPlugin
+https://github.com/dpalic/SimpleDirectoryContainer_EclipsePlugin/tree/master/ExportedPlugin
 
 or directly (but maybe outdated):
-https://github.com/dpalic/SimpleDirectoryContainer_EclipsePlugin/tree/master/SimpleDirectoryContainer_EclipsePlugin/ExportedPlugin/DirectoryClasspathContainer_1.1.3.jar
+https://github.com/dpalic/SimpleDirectoryContainer_EclipsePlugin/raw/master/ExportedPlugin/DirectoryClasspathContainer_1.1.2.jar
 
 I created this jar by exporting a "Deployable plug-ins and fragments" from Eclipse at the project level.
 
